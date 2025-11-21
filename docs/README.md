@@ -69,6 +69,7 @@
 - [AsyncFlateDrainHandler](type-aliases/AsyncFlateDrainHandler.md)
 - [AsyncFlateStreamHandler](type-aliases/AsyncFlateStreamHandler.md)
 - [AsyncZippableFile](type-aliases/AsyncZippableFile.md)
+- [FilenameDecoder](type-aliases/FilenameDecoder.md)
 - [FlateCallback](type-aliases/FlateCallback.md)
 - [FlateStreamHandler](type-aliases/FlateStreamHandler.md)
 - [GunzipMemberHandler](type-aliases/GunzipMemberHandler.md)

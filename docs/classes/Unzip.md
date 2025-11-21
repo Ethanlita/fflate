@@ -80,3 +80,23 @@ The decoder constructor
 #### Returns
 
 `void`
+
+***
+
+### setFilenameDecoder()
+
+> **setFilenameDecoder**(`decoder`: [`FilenameDecoder`](../type-aliases/FilenameDecoder.md)): `void`
+
+Sets a custom decoder for filenames when UTF-8 flag is not set
+
+#### Parameters
+
+##### decoder
+
+[`FilenameDecoder`](../type-aliases/FilenameDecoder.md)
+
+The decoder function
+
+#### Returns
+
+`void`

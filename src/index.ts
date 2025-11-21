@@ -2505,6 +2505,13 @@ export interface ZipAttributes {
 export interface ZipOptions extends DeflateOptions, ZipAttributes {}
 
 /**
+ * A function to decode filenames in ZIP archives when UTF-8 flag is not set
+ * @param data The raw filename bytes
+ * @returns The decoded filename string
+ */
+export type FilenameDecoder = (data: Uint8Array) => string;
+
+/**
  * Options for expanding a ZIP archive
  */
 export interface UnzipOptions {
@@ -2512,6 +2519,12 @@ export interface UnzipOptions {
    * A filter function to extract only certain files from a ZIP archive
    */
   filter?: UnzipFileFilter;
+  /**
+   * A custom decoder for filenames when UTF-8 flag is not set.
+   * By default, Latin-1 (ISO-8859-1) encoding is used.
+   * You can provide a custom decoder to handle other encodings like GBK, Shift-JIS, etc.
+   */
+  decodeFilename?: FilenameDecoder;
 }
 
 /**
@@ -2762,8 +2775,11 @@ const dbf = (l: number) => l == 1 ? 3 : l < 6 ? 2 : l == 9 ? 1 : 0;
 const slzh = (d: Uint8Array, b: number) => b + 30 + b2(d, b + 26) + b2(d, b + 28);
 
 // read zip header
-const zh = (d: Uint8Array, b: number, z: boolean) => {
-  const fnl = b2(d, b + 28), efl = b2(d, b + 30), fn = strFromU8(d.subarray(b + 46, b + 46 + fnl), !(b2(d, b + 8) & 2048)), es = b + 46 + fnl;
+const zh = (d: Uint8Array, b: number, z: boolean, decodeFilename?: FilenameDecoder) => {
+  const fnl = b2(d, b + 28), efl = b2(d, b + 30), es = b + 46 + fnl;
+  const isUtf8 = !!(b2(d, b + 8) & 2048);
+  const fnBytes = d.subarray(b + 46, b + 46 + fnl);
+  const fn = isUtf8 ? strFromU8(fnBytes, false) : (decodeFilename ? decodeFilename(fnBytes) : strFromU8(fnBytes, true));
   const [sc, su, off] = z64hs(d, es, efl, z, b4(d, b + 20), b4(d, b + 24), b4(d, b + 42));
   return [b2(d, b + 10), sc, su, fn, es + efl + b2(d, b + 32), off] as const;
 }
@@ -3601,6 +3617,7 @@ export class Unzip {
   private p: Uint8Array;
   private k: Uint8Array[][];
   private o: Record<number, UnzipDecoderConstructor>;
+  private decoder?: FilenameDecoder;
 
   /**
    * Creates a ZIP decompression stream
@@ -3613,6 +3630,14 @@ export class Unzip {
       0: UnzipPassThrough
     };
     this.p = et;
+  }
+
+  /**
+   * Sets a custom decoder for filenames when UTF-8 flag is not set
+   * @param decoder The decoder function
+   */
+  setFilenameDecoder(decoder: FilenameDecoder) {
+    this.decoder = decoder;
   }
   
   /**
@@ -3652,7 +3677,8 @@ export class Unzip {
             this.k.unshift(chks);
             f = 2;
             let lsc = b4(buf, i + 18), lsu = b4(buf, i + 22);
-            const fn = strFromU8(buf.subarray(i + 30, i += 30 + fnl), !u);
+            const fnBytes = buf.subarray(i + 30, i += 30 + fnl);
+            const fn = u ? strFromU8(fnBytes, false) : (this.decoder ? this.decoder(fnBytes) : strFromU8(fnBytes, true));
             let [sc, su,, z64] = z64hs(buf, i, es, 2, lsc, lsu, 0);
             if (dd) sc = -1 - z64;
             i += es;
@@ -3773,8 +3799,9 @@ export function unzip(data: Uint8Array, opts: AsyncUnzipOptions | UnzipCallback,
       }
     }
     const fltr = opts && (opts as AsyncUnzipOptions).filter;
+    const decoder = opts && (opts as AsyncUnzipOptions).decodeFilename;
     for (let i = 0; i < c; ++i) {
-      const [c, sc, su, fn, no, off] = zh(data, o, z), b = slzh(data, off);
+      const [c, sc, su, fn, no, off] = zh(data, o, z, decoder), b = slzh(data, off);
       o = no
       const cbl: FlateCallback = (e, d) => {
         if (e) {
@@ -3836,8 +3863,9 @@ export function unzipSync(data: Uint8Array, opts?: UnzipOptions) {
     }
   }
   const fltr = opts && opts.filter;
+  const decoder = opts && opts.decodeFilename;
   for (let i = 0; i < c; ++i) {
-    const [c, sc, su, fn, no, off] = zh(data, o, z), b = slzh(data, off);
+    const [c, sc, su, fn, no, off] = zh(data, o, z, decoder), b = slzh(data, off);
     o = no;
     if (!fltr || fltr({
       name: fn,
