@@ -1,4 +1,6 @@
 # fflate
+> This is `@ethanlita/fflate`, a fork of [fflate](https://github.com/101arrowz/fflate) 0.8.3 for [XBuilder](https://github.com/goplus/builder). It adds `decodeFilename`, to decode ZIP filenames not flagged as UTF-8 ([101arrowz/fflate#246](https://github.com/101arrowz/fflate/pull/246)), and its asynchronous `unzip` sends each worker only the file it inflates instead of a copy of the whole archive.
+
 High performance (de)compression in an 8kB package
 
 ## Why fflate?

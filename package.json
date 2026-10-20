@@ -1,6 +1,6 @@
 {
-  "name": "fflate",
-  "version": "0.8.3",
+  "name": "@ethanlita/fflate",
+  "version": "0.8.4",
   "description": "High performance (de)compression in an 8kB package",
   "main": "./lib/index.cjs",
   "module": "./esm/browser.js",
@@ -61,16 +61,12 @@
   },
   "sideEffects": false,
   "homepage": "https://101arrowz.github.io/fflate",
-  "repository": "https://github.com/101arrowz/fflate",
+  "repository": "https://github.com/Ethanlita/fflate",
   "bugs": {
-    "email": "arjunbarrett@gmail.com",
-    "url": "https://github.com/101arrowz/fflate/issues"
+    "url": "https://github.com/Ethanlita/fflate/issues"
   },
   "author": "Arjun Barrett <arjunbarrett@gmail.com>",
   "license": "MIT",
-  "engines": {
-    "node": "20.x"
-  },
   "keywords": [
     "gzip",
     "gunzip",
@@ -127,5 +123,8 @@
     "react-dom": "preact/compat",
     "buffer": false,
     "process": false
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
