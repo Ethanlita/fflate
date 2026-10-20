@@ -61,7 +61,10 @@
   },
   "sideEffects": false,
   "homepage": "https://101arrowz.github.io/fflate",
-  "repository": "https://github.com/Ethanlita/fflate",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ethanlita/fflate.git"
+  },
   "bugs": {
     "url": "https://github.com/Ethanlita/fflate/issues"
   },
