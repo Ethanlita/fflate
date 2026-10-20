@@ -3829,7 +3829,8 @@ export function unzip(data: Uint8Array, opts: AsyncUnzipOptions | UnzipCallback,
               cbl(e, null);
             }
           }
-          else term.push(inflate(infl, { size: su }, cbl));
+          // A worker sent a view of the archive receives a copy of all of it, so send a copy of this file alone, transferred
+          else term.push(inflate(slc(data, b, b + sc), { size: su, consume: true }, cbl));
         } else cbl(err(14, 'unknown compression type ' + c, 1), null);
       } else cbl(null, null);
     }
